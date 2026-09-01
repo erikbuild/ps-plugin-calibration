@@ -1,6 +1,6 @@
-# PrusaSlicer 3 Plugins
+# Calibration Plugin for PrusaSlicer 3
 
-Lua plugins for the plugin system introduced in PrusaSlicer 3.0.
+Printer calibration tools for the Lua plugin system introduced in PrusaSlicer 3.0.
 
 ## Plugins
 
