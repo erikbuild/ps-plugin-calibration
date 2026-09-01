@@ -3,7 +3,7 @@
 	"name": "Erik's Calibration Tools",
 	"license": "OCL v1.1 + SWAtt v1",
 	"min_slicer_version": "3.0.0",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"author": "erik",
 	"description": "Calibration plugins ported from OrcaSlicer",
 	"required_apis": {

@@ -118,6 +118,20 @@ local function draw_labels(w, L, S, z, epm_glyph, speed)
     end
 end
 
+--- Writer options from the settings: the profile's retraction values, and the
+--- extruder state the slicer hands over (retracted at the layer change unless
+--- retract_layer_change is off). A deretract speed of 0 means the retract speed.
+local function writer_opts(S)
+    local deretract = S.deretract_speed
+    if deretract == 0 then deretract = nil end
+    return {
+        travel_speed = S.travel_speed,
+        retract = S.retract, retract_speed = S.retract_speed, deretract_speed = deretract,
+        zhop = S.zhop,
+        retracted = S.retract_layer_change ~= false,
+    }
+end
+
 --- Assemble the four per-layer blobs. S is the settings table (see tests).
 function M.build(S)
     assert(firmware.set_pressure_advance(S.flavor, 0),
@@ -129,9 +143,10 @@ function M.build(S)
     local epm_glyph = draw.e_per_mm(S.nozzle, L.h, S.filament_d, S.flow_mult)
 
     local layers = {}
+    local entry = writer_opts(S)
     for i = 1, M.LAYERS do
         local z = i * L.h
-        local w = draw.new({travel_speed = S.travel_speed})
+        local w = draw.new(entry)
         draw.emit(w, string.format("; PA_PATTERN layer %d", i))
         draw.emit(w, "G90")
         -- Marlin-family firmware makes G90 absolute for E as well; without an
@@ -170,6 +185,11 @@ function M.build(S)
         if i == M.LAYERS then
             draw.emit(w, firmware.set_pressure_advance(S.flavor, 0))
         end
+        -- the slicer resumes believing the nozzle never left the handle's
+        -- seam: hand it back there, in the retraction state it handed over
+        draw.emit(w, "; park over the handle")
+        draw.park_at(w, S.bed_w / 2, S.bed_d / 2, z)
+        if not entry.retracted then draw.unretract(w) end
         table.insert(layers, {z = z, insert_z = (i - M.INSERT_Z_FRACTION) * L.h,
                               gcode = draw.gcode(w)})
     end

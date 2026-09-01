@@ -6,12 +6,15 @@ local M = {}
 local function fmm(v) return string.format("%.3f", v) end
 
 function M.new(opts)
+    local retract_speed = opts.retract_speed or 35
     return {
         x = 0, y = 0,
         travel_speed = opts.travel_speed or 150,
         retract = opts.retract or 0.8,
-        retract_speed = opts.retract_speed or 35,
+        retract_speed = retract_speed,
+        deretract_speed = opts.deretract_speed or retract_speed,
         zhop = opts.zhop or 0.5,
+        retracted = opts.retracted or false,   -- extruder state on entry
         out = {},
     }
 end
@@ -36,23 +39,38 @@ function M.e_per_mm(line_width, layer_height, filament_d, flow_mult)
            / (math.pi * (filament_d / 2) ^ 2)
 end
 
---- Travel with retract and z-hop; ends at (x, y, layer_z), unretracted.
-function M.travel_to(w, x, y, layer_z)
+--- Pull the retract length back; no-op when already retracted.
+function M.retract(w)
+    if w.retracted then return end
+    M.emit(w, string.format("G1 E-%.3f F%d", w.retract, math.floor(w.retract_speed * 60)))
+    w.retracted = true
+end
+
+--- Feed the retract length back in; no-op when already primed.
+function M.unretract(w)
+    if not w.retracted then return end
+    M.emit(w, string.format("G1 E%.3f F%d", w.retract, math.floor(w.deretract_speed * 60)))
+    w.retracted = false
+end
+
+--- Retract, z-hop, travel to (x, y), drop to layer_z; leaves the extruder retracted.
+function M.park_at(w, x, y, layer_z)
     local f_travel = math.floor(w.travel_speed * 60)
-    local f_retract = math.floor(w.retract_speed * 60)
-    M.emit(w, string.format("G1 E-%.3f F%d", w.retract, f_retract))
-    M.emit(w, string.format("G1 Z%s F%d", fmm(layer_z + w.zhop), f_travel))
+    M.retract(w)
+    if w.zhop > 0 then
+        M.emit(w, string.format("G1 Z%s F%d", fmm(layer_z + w.zhop), f_travel))
+    end
     M.emit(w, string.format("G1 X%s Y%s F%d", fmm(x), fmm(y), f_travel))
-    M.emit(w, string.format("G1 Z%s F%d", fmm(layer_z), f_travel))
-    M.emit(w, string.format("G1 E%.3f F%d", w.retract, f_retract))
+    if w.zhop > 0 then
+        M.emit(w, string.format("G1 Z%s F%d", fmm(layer_z), f_travel))
+    end
     w.x, w.y = x, y
 end
 
---- Short in-island travel: plain XY move, no retract and no z-hop.
-function M.hop_to(w, x, y)
-    M.emit(w, string.format("G1 X%s Y%s F%d", fmm(x), fmm(y),
-                            math.floor(w.travel_speed * 60)))
-    w.x, w.y = x, y
+--- Travel with retract and z-hop; ends at (x, y, layer_z), unretracted.
+function M.travel_to(w, x, y, layer_z)
+    M.park_at(w, x, y, layer_z)
+    M.unretract(w)
 end
 
 --- Extruding move from the current position; epm from M.e_per_mm, speed in mm/s.
@@ -138,30 +156,21 @@ function M.fmt_value(v)
 end
 
 --- Draw `str` rotated 90 degrees CCW: string advances in +Y, glyph tops point
---- in -X. (ox, oy) is the outer edge of the first glyph's baseline. One full
---- travel into the label; segments within it hop without retracting.
+--- in -X. (ox, oy) is the outer edge of the first glyph's baseline. Every
+--- segment starts with a full retracted travel, as Orca's glyphs do.
 function M.draw_number(w, ox, oy, str, opts)
     local adv = 0
-    local entered = false
-    local function seg_move(x, y)
-        if entered then
-            M.hop_to(w, x, y)
-        else
-            M.travel_to(w, x, y, opts.layer_z)
-            entered = true
-        end
-    end
     for i = 1, #str do
         local ch = str:sub(i, i)
         if ch == "." then
-            seg_move(ox, oy + adv + 0.7)
+            M.travel_to(w, ox, oy + adv + 0.7, opts.layer_z)
             M.line_to(w, ox - 0.6, oy + adv + 0.7, opts.epm, opts.speed)
         elseif GLYPHS[ch] then
             local segs = GLYPHS[ch]
             for k = 1, #segs do
                 local sg = SEGS[segs:sub(k, k)]
                 -- glyph (u, v) -> world (ox - v, oy + adv + u)
-                seg_move(ox - sg[2], oy + adv + sg[1])
+                M.travel_to(w, ox - sg[2], oy + adv + sg[1], opts.layer_z)
                 M.line_to(w, ox - sg[4], oy + adv + sg[3], opts.epm, opts.speed)
             end
         end

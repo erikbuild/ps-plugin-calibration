@@ -96,6 +96,21 @@ function execute(opts)
         flow_mult = guarded(1.0, function()
             return bed:material_presets(0):value("extrusion_multiplier")
         end),
+        retract = guarded(0.8, function()
+            return bed:print_presets():value("retract_length")
+        end),
+        retract_speed = guarded(35, function()
+            return bed:print_presets():value("retract_speed")
+        end),
+        deretract_speed = guarded(0, function()
+            return bed:print_presets():value("deretract_speed")
+        end),
+        zhop = guarded(0.5, function()
+            return bed:print_presets():value("retract_lift")
+        end),
+        retract_layer_change = guarded(true, function()
+            return bed:print_presets():value("retract_layer_change")
+        end),
     }
 
     if S.pa_start < 0 or S.pa_step <= 0 or S.pa_end < S.pa_start + S.pa_step then

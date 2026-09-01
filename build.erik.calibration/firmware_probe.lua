@@ -80,4 +80,15 @@ function execute(opts)
     print("    " .. read("pressure_advance", function()
         return bed:material_presets(0):value("pressure_advance")
     end))
+
+    -- Retraction lives in the print preset in PrusaSlicer 3 (scalar, with
+    -- per-tool and per-filament overrides); which box carries the effective value?
+    print("  PRINT PRESET RETRACTION")
+    for _, name in ipairs({"retract_length", "retract_speed", "deretract_speed",
+                           "retract_lift", "retract_layer_change"}) do
+        print("    " .. read(name, function() return bed:print_presets():value(name) end))
+        print("    " .. read("tool_print_presets(0)." .. name, function()
+            return bed:tool_print_presets(0):value(name)
+        end))
+    end
 end
