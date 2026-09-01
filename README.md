@@ -2,6 +2,8 @@
 
 Printer calibration tools for the Lua plugin system introduced in PrusaSlicer 3.0.
 
+![PA Pattern printed on a Prusa CORE One](pa-pattern_demo.jpg)
+
 ## Plugins
 
 The `build.erik.calibration` bundle contains:
