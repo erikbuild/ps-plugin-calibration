@@ -27,42 +27,23 @@ info = {
     },
 }
 
--- Run fn safely; any error or nil result yields the fallback. Runtime errors are
--- invisible in the UI, so no preset read is allowed to take the run down.
-local function guarded(fallback, fn)
-    local ok, v = pcall(fn)
-    if ok and v ~= nil then return v end
-    return fallback
-end
-
--- Failures must be visible: emboss the message as an object on the plate.
-local function show_error(msg)
-    print("PA Pattern: " .. msg)
-    local ok = pcall(function()
-        api.project:add_object{
-            mesh = api.emboss_text{font = api.get_default_font(), text = msg, depth = 1},
-            type = VolumeType.Solid,
-        }
-    end)
-    if not ok then print("PA Pattern: could not create the error object") end
-end
-
 function execute(opts)
+    local util = require("plugin_util")
     local firmware = require("firmware")
     local gen = require("pa_pattern_gen")
 
     local bed = api.project:current_bed()
     local flavor = firmware.from_bed(bed, opts.firmware)
     if firmware.set_pressure_advance(flavor, 0) == nil then
-        show_error("PA: NO PA COMMAND FOR " .. flavor)
+        util.show_error("PA Pattern", "PA: NO PA COMMAND FOR " .. flavor)
         return
     end
 
-    local rel_e = guarded(true, function()
+    local rel_e = util.guarded(true, function()
         return bed:printer_presets():value("use_relative_e_distances")
     end)
     if rel_e ~= true then
-        show_error("PA: NEEDS RELATIVE E")
+        util.show_error("PA Pattern", "PA: NEEDS RELATIVE E")
         return
     end
 
@@ -75,46 +56,46 @@ function execute(opts)
         bed_w = opts.bed_width,
         bed_d = opts.bed_depth,
         flavor = flavor,
-        layer_height = guarded(0.2, function()
+        layer_height = util.guarded(0.2, function()
             return bed:print_presets():value("layer_height")
         end),
-        nozzle = guarded(0.4, function()
+        nozzle = util.guarded(0.4, function()
             return bed:printer_config().tools[1]:nozzle_diameter()
         end),
-        perimeter_speed = guarded(0, function()
+        perimeter_speed = util.guarded(0, function()
             return bed:print_presets():value("perimeter_speed")
         end),
-        travel_speed = guarded(150, function()
+        travel_speed = util.guarded(150, function()
             return bed:print_presets():value("travel_speed")
         end),
-        vol_cap = guarded(0, function()
+        vol_cap = util.guarded(0, function()
             return bed:material_presets(0):value("filament_max_volumetric_speed")
         end),
-        filament_d = guarded(1.75, function()
+        filament_d = util.guarded(1.75, function()
             return bed:material_presets(0):value("filament_diameter")
         end),
-        flow_mult = guarded(1.0, function()
+        flow_mult = util.guarded(1.0, function()
             return bed:material_presets(0):value("extrusion_multiplier")
         end),
-        retract = guarded(0.8, function()
+        retract = util.guarded(0.8, function()
             return bed:print_presets():value("retract_length")
         end),
-        retract_speed = guarded(35, function()
+        retract_speed = util.guarded(35, function()
             return bed:print_presets():value("retract_speed")
         end),
-        deretract_speed = guarded(0, function()
+        deretract_speed = util.guarded(0, function()
             return bed:print_presets():value("deretract_speed")
         end),
-        zhop = guarded(0.5, function()
+        zhop = util.guarded(0.5, function()
             return bed:print_presets():value("retract_lift")
         end),
-        retract_layer_change = guarded(true, function()
+        retract_layer_change = util.guarded(true, function()
             return bed:print_presets():value("retract_layer_change")
         end),
     }
 
     if S.pa_start < 0 or S.pa_step <= 0 or S.pa_end < S.pa_start + S.pa_step then
-        show_error("PA: BAD RANGE")
+        util.show_error("PA Pattern", "PA: BAD RANGE")
         return
     end
 

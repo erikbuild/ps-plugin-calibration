@@ -15,6 +15,12 @@ The `build.erik.calibration` bundle contains:
   Supports Marlin, Marlin 2,
   Prusa Buddy, Klipper, RepRapFirmware, and Repetier dialects, detected
   automatically from the printer profile with a manual override.
+- **Flow Ratio** — OrcaSlicer's YOLO flow calibration: a plate of
+  Orca-standard coupons, each printed at a stepped flow multiplier and
+  labeled with the resulting absolute value. Pick the coupon with the
+  smoothest top surface; its label is your new extrusion multiplier —
+  enter it under *Filament → Filament → Extrusion multiplier*. Pure
+  `G1` output, so it works on every firmware.
 - **Firmware Probe** — diagnostic that reports what the plugin API can read
   from your printer profile and which G-code dialect it resolves to. Run
   PrusaSlicer from a terminal to see its output; useful when reporting
@@ -51,6 +57,26 @@ user plugin folder, then **Menu ▸ Plugins ▸ Rescan Plugins**:
   (mm³/s) the chevrons printed at — the same label OrcaSlicer's pattern
   prints (print speed × bead cross-section × flow multiplier; both
   slicers model the bead identically).
+
+## Flow Ratio notes
+
+![Flow Ratio plate sliced in PrusaSlicer 3 on a Prusa CORE One L](flow-ratio-demo.png)
+
+- **Coarse** prints 11 coupons at 0, ±0.01 … ±0.05 around your current
+  extrusion multiplier; **fine** prints 15 at ±0.005 … ±0.035 — OrcaSlicer's
+  YOLO delta sets. Labels are absolute values, so the winning coupon reads
+  as the exact number to type into the filament profile.
+- Judge the top surface: pinholes and gaps mean under-extrusion, ridges
+  and a rough nap mean over. With the default **archimedean** top pattern
+  the corner chords collide with the center spiral and raise a tactile lip
+  (Orca's trick) — run a fingernail across each coupon and pick the
+  smoothest. **monotonic** gives a plain 45° top instead.
+- Coupons are Orca's standard size (30×20 mm plus label tab); a coarse
+  plate is ~13 g and ~35 minutes at 0.4 mm.
+- Bed Width/Depth default to the CORE One (250×220); set them for your
+  printer.
+- The printer profile must use relative extruder distances (Prusa profiles
+  do). Failures are shown as an embossed text object on the plate.
 
 ## License
 
