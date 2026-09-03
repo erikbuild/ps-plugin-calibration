@@ -1,5 +1,5 @@
--- ABOUTME: Shared helpers for plugin glue scripts: guarded preset reads and
--- ABOUTME: plate-visible error reporting.
+-- ABOUTME: Shared helpers for plugin glue scripts: guarded preset reads,
+-- ABOUTME: plate-visible error reporting, and numeric param parsing.
 
 local M = {}
 
@@ -22,6 +22,13 @@ function M.show_error(prefix, msg)
         }
     end)
     if not ok then print(prefix .. ": could not create the error object") end
+end
+
+--- Parse a numeric string param; garbage or nil yields the fallback.
+function M.parse_number(s, default)
+    local v = tonumber(s)
+    if v == nil then return default end
+    return v
 end
 
 return M

@@ -48,9 +48,9 @@ function execute(opts)
     end
 
     local S = {
-        pa_start = gen.parse_number(opts.pa_start, 0),
-        pa_end = gen.parse_number(opts.pa_end, 0.08),
-        pa_step = gen.parse_number(opts.pa_step, 0.005),
+        pa_start = util.parse_number(opts.pa_start, 0),
+        pa_end = util.parse_number(opts.pa_end, 0.08),
+        pa_step = util.parse_number(opts.pa_step, 0.005),
         speed = opts.speed,
         accel = opts.accel,
         bed_w = opts.bed_width,

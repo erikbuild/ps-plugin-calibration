@@ -17,12 +17,6 @@ M.FIRST_LAYER_SPEED = 30   -- frame/tab/layer-1 speed [mm/s]
 M.GLYPH_SPEED = 20         -- digit drawing speed [mm/s], Orca's pattern value
 M.INSERT_Z_FRACTION = 0.5  -- blobs inserted at (i - this) * layer_height
 
-function M.parse_number(s, default)
-    local v = tonumber(s)
-    if v == nil then return default end
-    return v
-end
-
 --- Orca's find_optimal_PA_speed: at least 100 mm/s (or the profile's perimeter
 --- speed if higher), capped by the filament volumetric limit; cap 0 = uncapped.
 function M.resolve_speed(requested, perimeter_speed, vol_cap, line_width, layer_height)

@@ -285,6 +285,38 @@ function M.fill_archimedean_chords(w, min_x, min_y, size_x, size_y, opts)
     end
 end
 
+--- Concentric circular perimeters, innermost first (walls print inner-to-
+--- outer). r is the outermost wall centerline radius; each loop starts and
+--- closes at seam_deg. The first loop drawn enters with a full travel, later
+--- loops hop the sub-threshold gap. Loops that would collapse through the
+--- center are skipped.
+function M.draw_circle(w, cx, cy, r, opts)
+    local spacing = opts.line_width - opts.layer_height * (1 - math.pi / 4)
+    local seg_len = opts.seg_len or 0.5
+    local n = opts.perimeters
+    local entered = false
+    for k = n - 1, 0, -1 do
+        local rk = r - k * spacing
+        if rk > spacing / 2 then
+            local steps = math.max(12, math.ceil(2 * math.pi * rk / seg_len))
+            local a0 = math.rad(opts.seam_deg or 0)
+            local sx = cx + rk * math.cos(a0)
+            local sy = cy + rk * math.sin(a0)
+            if entered then
+                M.hop_to(w, sx, sy)
+            else
+                M.travel_to(w, sx, sy, opts.layer_z)
+                entered = true
+            end
+            for s = 1, steps do
+                local a = a0 + s * 2 * math.pi / steps
+                M.line_to(w, cx + rk * math.cos(a), cy + rk * math.sin(a),
+                          opts.epm, opts.speed)
+            end
+        end
+    end
+end
+
 -- 7-segment glyphs on a 2 x 4 mm cell. Segments in glyph space {x0, y0, x1, y1}.
 local SEGS = {
     a = {0, 4, 2, 4}, b = {2, 2, 2, 4}, c = {2, 0, 2, 2}, d = {0, 0, 2, 0},

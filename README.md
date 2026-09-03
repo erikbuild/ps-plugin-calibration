@@ -21,6 +21,13 @@ The `build.erik.calibration` bundle contains:
   smoothest top surface; its label is your new extrusion multiplier —
   enter it under *Filament → Filament → Extrusion multiplier*. Pure
   `G1` output, so it works on every firmware.
+- **Retraction** — OrcaSlicer's retraction tower: two slender posts whose
+  connecting travel retracts 0.1 mm more per 1 mm of height (0 to 2 mm by
+  default). Find the height where strings between the posts stop, measure
+  the clean millimeters above the 0.4 mm base, and divide by 10 — enter
+  the result under *Printer → Extruder → Retraction → Length*. Pure `G1`
+  output; the retraction values are baked into the G-code, so it works on
+  every firmware.
 - **Firmware Probe** — diagnostic that reports what the plugin API can read
   from your printer profile and which G-code dialect it resolves to. Run
   PrusaSlicer from a terminal to see its output; useful when reporting
@@ -75,6 +82,19 @@ user plugin folder, then **Menu ▸ Plugins ▸ Rescan Plugins**:
   plate is ~13 g and ~35 minutes at 0.4 mm.
 - Bed Width/Depth default to the CORE One (250×220); set them for your
   printer.
+- The printer profile must use relative extruder distances (Prusa profiles
+  do). Failures are shown as an embossed text object on the plate.
+
+## Retraction notes
+
+- The tower prints ~21 mm tall by default: 21 bands, one retraction step
+  per millimeter, starting just above the 0.4 mm base. A different
+  start/end/step changes the height to match.
+- Retraction fires at the posts' interior closest points (like OrcaSlicer),
+  so strings form across the gap you read; the outer flanks stay clean.
+- The small cylinder at bed center is the plugin's required handle object —
+  the slicer needs a real object on every layer to carry the custom G-code.
+  Run on an empty plate so it lands at bed center.
 - The printer profile must use relative extruder distances (Prusa profiles
   do). Failures are shown as an embossed text object on the plate.
 
