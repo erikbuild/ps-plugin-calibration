@@ -42,6 +42,7 @@ user plugin folder, then **Menu ▸ Plugins ▸ Rescan Plugins**:
 |---|---|
 | macOS | `~/Library/Application Support/PrusaSlicer3-dev/lua/` |
 | Windows | `%APPDATA%\PrusaSlicer3-dev\lua\` |
+| Linux | `~/.var/app/com.prusa3d.PrusaSlicer/config/PrusaSlicer3-dev/lua/` |
 
 (The `-dev` suffix applies to alpha/beta builds.)
 
