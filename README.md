@@ -88,6 +88,8 @@ user plugin folder, then **Menu ▸ Plugins ▸ Rescan Plugins**:
 
 ## Retraction notes
 
+![Retraction test demo on a Prusa CORE One L](retraction-demo.png)
+
 - The tower prints ~21 mm tall by default: 21 bands, one retraction step
   per millimeter, starting just above the 0.4 mm base. A different
   start/end/step changes the height to match.
