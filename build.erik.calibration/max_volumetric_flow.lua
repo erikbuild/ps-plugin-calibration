@@ -5,14 +5,14 @@ info = {
     id = "max_volumetric_flow",
     type = "project.plugin",
     title = "Max Volumetric Flow",
-    menu = "Calibration/Max Volumetric Flow",
+    menu = "Ultimate Calibration/Max Volumetric Flow",
     params = {
-        -- Flow values are strings: the dialog's float control rounds to whole
-        -- numbers (upstream bug), so fractional values cannot use type "float".
+        -- Flow values are text fields so fractional values also work on alpha11,
+        -- whose float control rounds to whole numbers.
         {name = "flow_start", label = "Start Flow [mm^3/s]", type = "string", default = "5"},
         {name = "flow_end", label = "End Flow [mm^3/s]", type = "string", default = "20"},
         {name = "flow_step", label = "Step [mm^3/s per mm]", type = "string", default = "0.5"},
-        {name = "extruder", label = "Extruder", type = "int", default = 1},
+        {name = "extruder", label = "Tool/Extruder", type = "int", default = 1},
         {name = "note", label = "Note (badge line 2)", type = "string", default = ""},
         {name = "bed_width", label = "Bed Width [mm]", type = "int", default = 250},
     },
@@ -24,16 +24,19 @@ function execute(opts)
 
     local bed = api.project:current_bed()
 
-    -- extruder ids are material slots; a slot that doesn't exist throws
+    -- extruder ids are material slots; a slot or tool that doesn't exist throws
     local extruder = opts.extruder
-    if extruder < 1 or not pcall(function() return bed:material_presets(extruder - 1) end) then
+    -- a single-tool printer with an MMU has several slots on tool 1
+    local tool_count = util.guarded(1, function() return bed:printer_config().tool_count end)
+    local tool = (tool_count == 1) and 1 or extruder
+    if extruder < 1 or not pcall(function()
+        bed:material_presets(extruder - 1)
+        bed:tool_print_presets(tool - 1)
+    end) then
         util.show_error("Max Volumetric Flow", "MAXFLOW: BAD EXTRUDER")
         return
     end
     local slot = bed:material_presets(extruder - 1)
-    -- a single-tool printer with an MMU has several slots on tool 1
-    local tool_count = util.guarded(1, function() return bed:printer_config().tool_count end)
-    local tool = (tool_count == 1) and 1 or extruder
 
     local S = {
         flow_start = util.parse_number(opts.flow_start, 5),
@@ -46,6 +49,7 @@ function execute(opts)
             return slot:value("extrusion_multiplier")
         end),
         temperature = util.guarded(false, function() return slot:value("temperature") end),
+        filament_type = util.guarded(false, function() return slot:value("filament_type") end),
         high_flow = util.guarded(false, function()
             return bed:printer_config().tools[tool]:feature("nozzle_high_flow")
         end),
@@ -61,13 +65,21 @@ function execute(opts)
     end
     local h = plan.h
 
-    -- Measured before any preset write, so a too-long note changes nothing.
+    -- Meshes are built and checked before any preset write, so an error
+    -- changes nothing.
     local text = api.emboss_text{font = api.get_default_font(), text = plan.badge_text,
                                  depth = 2 * h, line_height = gen.BADGE_LINE_HEIGHT}
     local tb = text:bounds()
     local text_w, text_d = tb.max_x - tb.min_x, tb.max_y - tb.min_y
     if text_w + 2 * gen.BADGE_PAD > gen.COMB_W then
         util.show_error("Max Volumetric Flow", "MAXFLOW: NOTE TOO LONG")
+        return
+    end
+    -- a missing or unreadable SVG embosses to an empty mesh, not an error
+    local comb = api.emboss_svg(gen.COMB_SVG, plan.height)
+    local ok, bb = pcall(function() return comb:bounds() end)
+    if not ok or math.abs(bb.max_x - bb.min_x - gen.COMB_W) > 1 then
+        util.show_error("Max Volumetric Flow", "MAXFLOW: NO COMB")
         return
     end
 
@@ -80,8 +92,11 @@ function execute(opts)
     -- the speed bands drift off the layer grid (half a layer by 73 mm at 0.22%).
     slot:set("filament_shrinkage_compensation_z", 0)
     bed:print_presets():set("layer_height", h)
-    -- the tool's print preset wins over the print preset on multi-tool printers
-    for _, box in ipairs{bed:print_presets(), bed:tool_print_presets(tool - 1)} do
+    -- The tool's print preset wins over the print preset on multi-tool
+    -- printers; a single-tool printer refuses to slice with any tool override.
+    local boxes = {bed:print_presets()}
+    if tool_count > 1 then table.insert(boxes, bed:tool_print_presets(tool - 1)) end
+    for _, box in ipairs(boxes) do
         box:set("first_layer_height", h)
         box:set("max_volumetric_speed", 0)
         box:set("max_volumetric_extrusion_rate_slope_positive", 0)
@@ -91,9 +106,6 @@ function execute(opts)
     -- Leftover per-layer blobs from our other calibrations survive object
     -- deletion and would print inside the comb.
     api.project:clear_layer_custom_steps(bed)
-
-    local comb = api.emboss_svg(gen.COMB_SVG, plan.height)
-    local bb = comb:bounds()
 
     -- one speed region per layer: layer k sits in [(k-1)h, kh]
     local m = gen.MODIFIER_MARGIN
@@ -107,7 +119,13 @@ function execute(opts)
         })
     end
 
-    -- note badge in front of the comb, centered in X
+    -- note badge in front of the comb, centered in X. With the volumetric caps
+    -- zeroed it prints at the first band's speed: its lines are narrower than
+    -- the tower wall, so its flow stays under the start flow.
+    local s1 = plan.speeds[1]
+    local badge_speeds = {perimeter_speed = s1, external_perimeter_speed = s1,
+                          small_perimeter_speed = s1, solid_infill_speed = s1,
+                          top_solid_infill_speed = s1, gap_fill_speed = s1}
     local pad = gen.BADGE_PAD
     local bg_w, bg_d = text_w + 2 * pad, text_d + 2 * pad
     local bg_x = (bb.min_x + bb.max_x) / 2 - bg_w / 2
@@ -116,11 +134,13 @@ function execute(opts)
         mesh = api.make_cube(bg_w, bg_d, 2 * h),
         translate = {x = bg_x, y = bg_y, z = 0},
         type = VolumeType.Solid,
+        params = badge_speeds,
     })
     table.insert(volumes, {
         mesh = text,
         translate = {x = bg_x + pad - tb.min_x, y = bg_y + pad - tb.min_y, z = 2 * h - tb.min_z},
         type = VolumeType.Solid,
+        params = badge_speeds,
     })
 
     api.project:add_object{

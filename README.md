@@ -30,7 +30,7 @@ The `build.erik.calibration` bundle contains:
   every firmware.
 - **Max Volumetric Flow** — OrcaSlicer's max-flow tower: a single-wall comb
   whose wall speed rises every layer, so the commanded flow climbs 0.5 mm³/s
-  per millimeter of height (5 to 21 mm³/s by default). Find the height where
+  per millimeter of height (5 to 20 mm³/s by default). Find the height where
   the wall turns rough or gappy, or the extruder starts clicking; your
   maximum flow is 5 + 0.5 × that height. Enter it, with a margin, as the
   filament's *Max volumetric speed*. Unlike the Flow Tower that ships with
@@ -44,7 +44,8 @@ The `build.erik.calibration` bundle contains:
 ## Install
 
 Copy (or symlink) the `build.erik.calibration` directory into PrusaSlicer's
-user plugin folder, then **Menu ▸ Plugins ▸ Rescan Plugins**:
+user plugin folder, then **Menu ▸ Plugins ▸ Rescan Plugins**. The tools
+appear under **Plugins ▸ Ultimate Calibration**:
 
 | OS | Plugin folder |
 |---|---|
@@ -58,7 +59,8 @@ A plugin's dialog remembers the values you last ran it with until you run
 another plugin or restart PrusaSlicer. To get the defaults back, use
 **Menu ▸ Plugins ▸ Rescan Plugins**.
 
-**Requires PrusaSlicer 3.0.0-alpha11 or newer.**
+**Requires PrusaSlicer 3.0.0-alpha11 or newer; Max Volumetric Flow needs
+alpha12** (alpha11 ignores the badge text's depth).
 
 ## PA Pattern notes
 
@@ -117,12 +119,15 @@ another plugin or restart PrusaSlicer. To get the defaults back, use
 
 - The tower follows OrcaSlicer's recipe: layers 0.8 × the nozzle (0.32 mm on
   a 0.4), a 1.75 × nozzle wide wall, and one speed per layer. Flow at height
-  `z` is `start + z × step`; the top layer tests `end + 1`, so the default
-  5–20 run is 100 layers, 32 mm tall, and tops out at 21 mm³/s.
-- The badge in front of the comb prints the nozzle temperature, the nozzle
-  (`HF` for high-flow), the flow range, and the step, with your note (up to
-  about 45 characters) centered on a second line, so the print explains
-  itself later.
+  `z` is `start + z × step`, and the tower stops at `end`: the default
+  5–20 run is 94 layers, 30 mm tall.
+- The badge in front of the comb prints the filament type, the nozzle
+  temperature, the nozzle (`HF` for high-flow), the flow range, and the step,
+  with your note (up to about 45 characters) centered on a second line, so
+  the print explains itself later. PrusaSlicer doesn't let plugins read the
+  filament preset's name yet, so put it in the note.
+- **Tool/Extruder** is numbered from 1, as in PrusaSlicer's tool list. The
+  tower prints with it, and its filament is the one whose limits are zeroed.
 - **It changes the project's presets and cannot change them back.** On the
   chosen extruder's filament it sets *Max volumetric speed*, the cooling
   slowdown (*Slow down if layer print time is below*) and Z shrinkage
@@ -134,11 +139,13 @@ another plugin or restart PrusaSlicer. To get the defaults back, use
 - The tower must be the only object on the bed: other objects would pick up
   the zeroed limits, and on multi-tool printers another tool's first layer
   shifts the speed bands. Run it on an empty plate.
-- The comb is 180 mm wide; the bed must be at least 200 mm wide (Bed Width
-  defaults to 250).
-- Ranges above 300 layers are refused. Check *Actual volumetric flow* in the
-  preview before printing: the printer's own speed and acceleration limits
-  still apply on the turns at high flow.
+- The comb is 180 mm wide; the bed must be at least 200 mm wide. Set Bed
+  Width for your printer (it defaults to the CORE One's 250).
+- The tower is at most 300 layers: (End − Start) / Step can be up to 96 mm
+  on a 0.4 nozzle, so End can go up to 53 with the default Start and Step.
+  Longer ranges are refused with `BAD RANGE`. Check *Actual volumetric flow*
+  in the preview before printing: the printer's own speed and acceleration
+  limits still apply on the turns at high flow.
 - Failures are shown as an embossed text object on the plate.
 
 ## License

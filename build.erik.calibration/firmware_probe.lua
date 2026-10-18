@@ -8,7 +8,7 @@ info = {
     id = "firmware_probe",
     type = "project.plugin",
     title = "Firmware Probe",
-    menu = "Calibration/Firmware Probe",
+    menu = "Ultimate Calibration/Firmware Probe",
     params = {
         {
             name = "firmware",

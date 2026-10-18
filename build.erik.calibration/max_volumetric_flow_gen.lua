@@ -23,9 +23,10 @@ function M.bead(nozzle)
     return h, w, draw.bead_area(w, h)
 end
 
---- Orca's tower height (end - start + 1) / step, in whole layers.
+--- Tower height (end - start) / step in whole layers, so the top layer prints
+--- the end flow (Orca's rule adds 1 and overshoots it).
 function M.layer_count(S, h)
-    return math.floor((S.flow_end - S.flow_start + 1) / S.flow_step / h + 0.5)
+    return math.floor((S.flow_end - S.flow_start) / S.flow_step / h + 0.5)
 end
 
 --- Wall speed per layer [mm/s]: layer k at z = k * h extrudes start + z * step.
@@ -43,10 +44,14 @@ function M.top_flow(S, h, n)
     return S.flow_start + n * h * S.flow_step
 end
 
---- The conditions that make the print readable later: temperature, nozzle,
---- flow range, and step on the first line, the note (if any) on the second.
+--- The conditions that make the print readable later: filament type,
+--- temperature, nozzle, flow range, and step on the first line, the note (if
+--- any) on the second.
 function M.badge_text(S, top_flow)
     local parts = {}
+    if type(S.filament_type) == "string" and S.filament_type ~= "" then
+        table.insert(parts, S.filament_type)
+    end
     if type(S.temperature) == "number" then
         table.insert(parts, string.format("%dC", math.floor(S.temperature)))
     end

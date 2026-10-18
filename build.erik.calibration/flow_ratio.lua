@@ -5,7 +5,7 @@ info = {
     id = "flow_ratio",
     type = "project.plugin",
     title = "Flow Ratio",
-    menu = "Calibration/Flow Ratio",
+    menu = "Ultimate Calibration/Flow Ratio",
     params = {
         {name = "mode", label = "Mode (coarse|fine)", type = "string",
          default = "coarse"},

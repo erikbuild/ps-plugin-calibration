@@ -5,7 +5,7 @@ info = {
     id = "retraction",
     type = "project.plugin",
     title = "Retraction",
-    menu = "Calibration/Retraction",
+    menu = "Ultimate Calibration/Retraction",
     params = {
         {name = "ret_start", label = "Start Length [mm]", type = "string",
          default = "0"},

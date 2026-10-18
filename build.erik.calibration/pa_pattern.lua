@@ -7,7 +7,7 @@ info = {
     id = "pa_pattern",
     type = "project.plugin",
     title = "PA Pattern",
-    menu = "Calibration/PA Pattern",
+    menu = "Ultimate Calibration/PA Pattern",
     params = {
         -- PA values are strings: the dialog's float control rounds to whole
         -- numbers (upstream bug), so fractional values cannot use type "float".
