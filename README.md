@@ -2,7 +2,7 @@
 
 Printer calibration tools for the Lua plugin system introduced in PrusaSlicer 3.0.
 
-![PA Pattern printed on a Prusa CORE One](pa-pattern_demo.jpg)
+![PA Pattern printed on a Prusa CORE One](images/pa-pattern_demo.jpg)
 
 ## Plugins
 
@@ -64,6 +64,8 @@ alpha12** (alpha11 ignores the badge text's depth).
 
 ## PA Pattern notes
 
+OrcaSlicer's guide: [Pressure Advance calibration](https://github.com/OrcaSlicer/OrcaSlicer/wiki/pressure_advance_calib).
+
 - Defaults suit a direct-drive 0.4 mm nozzle (PA 0–0.08, step 0.005).
   For Bowden extruders try 0–1.0 with step 0.05. Both ranges come from
   OrcaSlicer's PA calibration dialog defaults; the Bowden range matches
@@ -82,7 +84,9 @@ alpha12** (alpha11 ignores the badge text's depth).
 
 ## Flow Ratio notes
 
-![Flow Ratio plate sliced in PrusaSlicer 3 on a Prusa CORE One L](flow-ratio-demo.png)
+![Flow Ratio plate sliced in PrusaSlicer 3 on a Prusa CORE One L](images/flow-ratio-demo.png)
+
+OrcaSlicer's guide: [Flow Ratio calibration](https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib).
 
 - **Coarse** prints 11 coupons at 0, ±0.01 … ±0.05 around your current
   extrusion multiplier; **fine** prints 15 at ±0.005 … ±0.035 — OrcaSlicer's
@@ -102,7 +106,9 @@ alpha12** (alpha11 ignores the badge text's depth).
 
 ## Retraction notes
 
-![Retraction test demo on a Prusa CORE One L](retraction-demo.png)
+![Retraction test demo on a Prusa CORE One L](images/retraction-demo.png)
+
+OrcaSlicer's guide: [Retraction test](https://github.com/OrcaSlicer/OrcaSlicer/wiki/retraction_calib).
 
 - The tower prints ~21 mm tall by default: 21 bands, one retraction step
   per millimeter, starting just above the 0.4 mm base. A different
@@ -116,6 +122,10 @@ alpha12** (alpha11 ignores the badge text's depth).
   do). Failures are shown as an embossed text object on the plate.
 
 ## Max Volumetric Flow notes
+
+![Max Volumetric Flow tower in PrusaSlicer 3's Actual volumetric flow preview on a Prusa CORE One INDX](images/max-flow-demo.png)
+
+OrcaSlicer's guide: [Max Volumetric Speed calibration](https://github.com/OrcaSlicer/OrcaSlicer/wiki/volumetric_speed_calib).
 
 - The tower follows OrcaSlicer's recipe: layers 0.8 × the nozzle (0.32 mm on
   a 0.4), a 1.75 × nozzle wide wall, and one speed per layer. Flow at height
