@@ -36,6 +36,9 @@ The `build.erik.calibration` bundle contains:
   filament's *Max volumetric speed*. Unlike the Flow Tower that ships with
   PrusaSlicer 3, it removes the cooling slowdown that caps that tower's top
   bands.
+- **Voron Test Cube** — adds Voron Design's official 30 mm test cube
+  (Voron_Design_Cube_v7) to the plate, centered on the bed. It changes no
+  settings; give it whichever tool you like in the object list.
 
 ## Install
 
@@ -154,9 +157,22 @@ OrcaSlicer's guide: [Max Volumetric Speed calibration](https://github.com/OrcaSl
   limits still apply on the turns at high flow.
 - Failures are shown as an embossed text object on the plate.
 
+## Voron Test Cube notes
+
+- The cube is Voron Design's `Voron_Design_Cube_v7.stl`, shipped unmodified
+  from the [Voron-2 repository](https://github.com/VoronDesign/Voron-2/blob/3b4c0e4a4e88086b04474fec28a54ab82917fc8a/STLs/Test_Prints/Voron_Design_Cube_v7.stl).
+  It is licensed under the GNU GPL v3.0, not this bundle's license: see
+  `Voron_Design_Cube_v7-NOTICE.txt` and `Voron_Design_Cube_v7-LICENSE.txt`
+  next to it in the bundle.
+- Running it twice stacks two cubes at bed center; move one by hand.
+
 ## License
 
 **OCL v1.1 + SWAtt v1** — Prusa's [Open Community License](https://github.com/OpenCommunityLicence/OpenCommunityLicence)
 with the Software Attribution add-on. Free to use, modify, and hack;
 derivatives must stay under OCL and credit the creator ("built on …") in
 their UI and source. See [LICENSE](LICENSE).
+
+The one exception is the Voron Design cube STL used by Voron Test Cube, a
+separate work licensed under GPL-3.0 and shipped unmodified with its own
+license text and notice.

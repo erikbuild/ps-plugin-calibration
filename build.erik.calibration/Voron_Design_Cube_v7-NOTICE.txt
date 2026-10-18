@@ -1,0 +1,14 @@
+Voron_Design_Cube_v7.stl
+
+Voron Design Cube v7 by Voron Design (https://vorondesign.com).
+
+Source: https://github.com/VoronDesign/Voron-2/blob/3b4c0e4a4e88086b04474fec28a54ab82917fc8a/STLs/Test_Prints/Voron_Design_Cube_v7.stl
+(branch Voron2.4, the 2.4r2 STL release). The Voron-2 repository is the
+source for this file; it holds no separate CAD for the cube.
+
+This file is distributed unmodified under the GNU General Public License,
+version 3. The full text is in Voron_Design_Cube_v7-LICENSE.txt.
+SHA-256: e30c299b773bd1e1134c40edda44683ed7d35c6d12c7e9470891d94d354729ab
+
+The rest of this bundle (build.erik.calibration) is licensed under
+OCL v1.1 + SWAtt v1; the cube is a separate work shipped alongside it.
