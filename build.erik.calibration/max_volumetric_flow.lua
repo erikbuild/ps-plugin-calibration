@@ -1,11 +1,11 @@
--- ABOUTME: Max Volumetric Flow plugin: prints Orca's single-wall comb tower with one speed
+-- ABOUTME: Max Volumetric Speed plugin: prints Orca's single-wall comb tower with one speed
 -- ABOUTME: modifier per layer so flow climbs start + z * step, plus a note badge.
 
 info = {
     id = "max_volumetric_flow",
     type = "project.plugin",
-    title = "Max Volumetric Flow",
-    menu = "Ultimate Calibration/Max Volumetric Flow",
+    title = "Max Volumetric Speed",
+    menu = "Ultimate Calibration/Max Volumetric Speed",
     params = {
         -- Flow values are text fields so fractional values also work on alpha11,
         -- whose float control rounds to whole numbers.
@@ -33,7 +33,7 @@ function execute(opts)
         bed:material_presets(extruder - 1)
         bed:tool_print_presets(tool - 1)
     end) then
-        util.show_error("Max Volumetric Flow", "MAXFLOW: BAD EXTRUDER")
+        util.show_error("Max Volumetric Speed", "MAXFLOW: BAD EXTRUDER")
         return
     end
     local slot = bed:material_presets(extruder - 1)
@@ -60,7 +60,7 @@ function execute(opts)
 
     local plan = gen.build(S)
     if plan.error then
-        util.show_error("Max Volumetric Flow", plan.error)
+        util.show_error("Max Volumetric Speed", plan.error)
         return
     end
     local h = plan.h
@@ -72,14 +72,14 @@ function execute(opts)
     local tb = text:bounds()
     local text_w, text_d = tb.max_x - tb.min_x, tb.max_y - tb.min_y
     if text_w + 2 * gen.BADGE_PAD > gen.COMB_W then
-        util.show_error("Max Volumetric Flow", "MAXFLOW: NOTE TOO LONG")
+        util.show_error("Max Volumetric Speed", "MAXFLOW: NOTE TOO LONG")
         return
     end
     -- a missing or unreadable SVG embosses to an empty mesh, not an error
     local comb = api.emboss_svg(gen.COMB_SVG, plan.height)
     local ok, bb = pcall(function() return comb:bounds() end)
     if not ok or math.abs(bb.max_x - bb.min_x - gen.COMB_W) > 1 then
-        util.show_error("Max Volumetric Flow", "MAXFLOW: NO COMB")
+        util.show_error("Max Volumetric Speed", "MAXFLOW: NO COMB")
         return
     end
 
@@ -163,7 +163,7 @@ function execute(opts)
     }
 
     print(string.format(
-        "Max Volumetric Flow: %g..%g mm3/s (+%g/mm), %d layers at %.2f mm, %d..%d mm/s, extruder %d",
+        "Max Volumetric Speed: %g..%g mm3/s (+%g/mm), %d layers at %.2f mm, %d..%d mm/s, extruder %d",
         S.flow_start, plan.top_flow, S.flow_step, plan.layers, h,
         plan.speeds[1], plan.speeds[plan.layers], extruder))
 end

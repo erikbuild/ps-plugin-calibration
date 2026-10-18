@@ -28,7 +28,7 @@ The `build.erik.calibration` bundle contains:
   the result under *Printer → Extruder → Retraction → Length*. Pure `G1`
   output; the retraction values are baked into the G-code, so it works on
   every firmware.
-- **Max Volumetric Flow** — OrcaSlicer's max-flow tower: a single-wall comb
+- **Max Volumetric Speed** — OrcaSlicer's max-flow tower: a single-wall comb
   whose wall speed rises every layer, so the commanded flow climbs 0.5 mm³/s
   per millimeter of height (5 to 20 mm³/s by default). Find the height where
   the wall turns rough or gappy, or the extruder starts clicking; your
@@ -36,10 +36,6 @@ The `build.erik.calibration` bundle contains:
   filament's *Max volumetric speed*. Unlike the Flow Tower that ships with
   PrusaSlicer 3, it removes the cooling slowdown that caps that tower's top
   bands.
-- **Firmware Probe** — diagnostic that reports what the plugin API can read
-  from your printer profile and which G-code dialect it resolves to. Run
-  PrusaSlicer from a terminal to see its output; useful when reporting
-  issues.
 
 ## Install
 
@@ -59,7 +55,7 @@ A plugin's dialog remembers the values you last ran it with until you run
 another plugin or restart PrusaSlicer. To get the defaults back, use
 **Menu ▸ Plugins ▸ Rescan Plugins**.
 
-**Requires PrusaSlicer 3.0.0-alpha11 or newer; Max Volumetric Flow needs
+**Requires PrusaSlicer 3.0.0-alpha11 or newer; Max Volumetric Speed needs
 alpha12** (alpha11 ignores the badge text's depth).
 
 ## PA Pattern notes
@@ -121,9 +117,9 @@ OrcaSlicer's guide: [Retraction test](https://github.com/OrcaSlicer/OrcaSlicer/w
 - The printer profile must use relative extruder distances (Prusa profiles
   do). Failures are shown as an embossed text object on the plate.
 
-## Max Volumetric Flow notes
+## Max Volumetric Speed notes
 
-![Max Volumetric Flow tower in PrusaSlicer 3's Actual volumetric flow preview on a Prusa CORE One INDX](images/max-flow-demo.png)
+![Max Volumetric Speed tower in PrusaSlicer 3's Actual volumetric flow preview on a Prusa CORE One INDX](images/max-flow-demo.png)
 
 OrcaSlicer's guide: [Max Volumetric Speed calibration](https://github.com/OrcaSlicer/OrcaSlicer/wiki/volumetric_speed_calib).
 
